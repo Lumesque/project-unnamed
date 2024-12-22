@@ -17,6 +17,7 @@
   let
     overlays = [ zig-overlay.overlays.default ];
     pkgs = nixpkgs.legacyPackages.${system}.appendOverlays overlays;
+    doxypypy = (import ./deps/doxypypy.nix {inherit pkgs;}).default;
     python-packages = [(pkgs.python312.withPackages (pp: [
       pp.ipython
     ]))];
@@ -24,7 +25,7 @@
       pkgs.zigpkgs."0.13.0"
       pkgs.gcc
       pkgs.doxygen
-      pkgs.sphinx
+      doxypypy
     ];
   in
   {

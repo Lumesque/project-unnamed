@@ -60,3 +60,7 @@ Project chosen:
 - [ ] Dotfile management
 - [ ] Process manager
 - [ ] API for syscalls
+
+## Documentation system
+
+The documentation system is mainly going to be done through `doxygen`. Zig's should do it itself, but if needbe it's just going through the ast, which zig should already create, and we can create a walker for it if need be.
