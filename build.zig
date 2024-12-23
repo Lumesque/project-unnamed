@@ -63,6 +63,13 @@ pub fn build(b: *std.Build) void {
         run_cmd.addArgs(args);
     }
 
+    const tests = b.step("test", "Run tests");
+    const pytests = b.addSystemCommand(&.{"pytest"});
+    if (b.args) |args| {
+        pytests.addArgs(args);
+    }
+    tests.dependOn(&pytests.step);
+
     const docs = b.step("docs", "Generate docs");
     const doxy_run = b.addSystemCommand(&.{ "doxygen", "doxygen.config" });
     docs.dependOn(&doxy_run.step);
@@ -92,4 +99,37 @@ pub fn build(b: *std.Build) void {
     }
     clean_step.dependOn(&b.addRemoveDirTree(b.pathFromRoot("zig-out")).step);
     clean_step.dependOn(&b.addRemoveDirTree(b.pathFromRoot("html")).step);
+    add_remove_all_dirs(b, clean_step, b.pathFromRoot("."), "__pycache__") catch |err| {
+        std.debug.print("{}\n", .{err});
+    };
+    add_remove_all_dirs(b, clean_step, b.pathFromRoot("."), ".pytest_cache") catch |err| {
+        std.debug.print("{}\n", .{err});
+    };
+    //clean_step.dependOn(&b.addRemoveDirTree(b.pathFromRoot("**/__pycache__")).step);
+}
+
+fn add_remove_all_dirs(b: *std.Build, _step: *std.Build.Step, path: []const u8, dirname: []const u8) !void {
+    var dir = try std.fs.cwd().openDir(path, .{ .iterate = true });
+    defer dir.close();
+    var it = dir.iterate();
+    while (try it.next()) |file| {
+        if (std.mem.eql(u8, file.name, dirname)) {
+            if (std.fs.path.join(std.heap.page_allocator, &.{ path, file.name })) |resdir| {
+                _step.dependOn(&b.addRemoveDirTree(b.pathFromRoot(resdir)).step);
+            } else |err| {
+                std.debug.print("Could not join paths {s} and {s}", .{ path, file.name });
+                return err;
+            }
+        } else if (file.kind == .directory) {
+            if (std.fs.path.join(std.heap.page_allocator, &.{ path, file.name })) |newdir| {
+                add_remove_all_dirs(b, _step, newdir, dirname) catch |err| {
+                    std.debug.print("Could not find {s}\n", .{newdir});
+                    return err;
+                };
+            } else |err| {
+                std.debug.print("Could not join paths {s} and {s}", .{ path, file.name });
+                return err;
+            }
+        }
+    }
 }

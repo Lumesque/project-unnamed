@@ -20,6 +20,7 @@
     doxypypy = (import ./deps/doxypypy.nix {inherit pkgs;}).default;
     python-packages = [(pkgs.python312.withPackages (pp: [
       pp.ipython
+      pp.pytest
     ]))];
     dev-pkgs = [
       pkgs.zigpkgs."0.13.0"
