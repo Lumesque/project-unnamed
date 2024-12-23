@@ -42,7 +42,7 @@ The development environment is set up best through **nix**. This allows all of u
 > * python 3.12 (currently only has ipython)
 > * gcc version 13.2.0
 > * doxygen version 1.10.0
-> * sphinx version 7.3.7
+> * doxypypy version 0.8.8.7
 
 ## Potential ideas
 1. Rest api using C++ and Python
