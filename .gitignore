@@ -198,3 +198,5 @@ cython_debug/
 
 old_mods.json
 .direnv
+
+zig-out*
