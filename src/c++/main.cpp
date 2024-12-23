@@ -1,4 +1,4 @@
-/**
+/** @file
 * This is an introduction into how doxygen comments will be generated.
 *
 */
@@ -7,6 +7,7 @@
 /** A test class with an example description */
 /*! A more elaborate class description. */
 class ExampleClass {
+public:
     /** Class constructor
      *  Some form of a description
      */

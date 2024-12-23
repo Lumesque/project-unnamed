@@ -199,4 +199,9 @@ cython_debug/
 old_mods.json
 .direnv
 
+# Zig
 zig-out*
+
+# Doxygen
+html*
+latex*
