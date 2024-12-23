@@ -11,6 +11,7 @@
     - [Windows](#windows)
 - [Potential ideas](#potential-ideas)
 - [Documentation system](#documentation-system)
+    - [How to run](#how-to-run)
 
 ## License
 
@@ -64,3 +65,10 @@ Project chosen:
 ## Documentation system
 
 The documentation system is mainly going to be done through `doxygen`. Zig's should do it itself, but if needbe it's just going through the ast, which zig should already create, and we can create a walker for it if need be.
+
+### How to run
+The documentation is ran through `zig`. In order to generate html documentation, please run
+```bash
+zig build docs
+```
+The generaed documentation will be in the local **html** directory.
