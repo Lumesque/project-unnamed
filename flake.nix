@@ -26,6 +26,7 @@
       pkgs.zigpkgs."0.13.0"
       pkgs.gcc
       pkgs.doxygen
+      pkgs.ruff
       doxypypy
     ];
   in

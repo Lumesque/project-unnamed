@@ -68,6 +68,7 @@ pub fn build(b: *std.Build) void {
     if (b.args) |args| {
         pytests.addArgs(args);
     }
+    pytests.failing_to_execute_foreign_is_an_error = false;
     tests.dependOn(&pytests.step);
 
     const docs = b.step("docs", "Generate docs");
@@ -91,7 +92,13 @@ pub fn build(b: *std.Build) void {
         },
         .check = true,
     });
+    const ruff_run = b.addSystemCommand(&.{ "ruff", "format" });
+    ruff_run.failing_to_execute_foreign_is_an_error = false;
+    if (b.args) |args| {
+        ruff_run.addArgs(args);
+    }
     fmt_step.dependOn(&fmt.step);
+    fmt_step.dependOn(&ruff_run.step);
 
     const clean_step = b.step("clean", "Clean up created files and documentation.");
     if (@import("builtin").os.tag != .windows) {

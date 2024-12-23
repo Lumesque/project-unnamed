@@ -1,4 +1,4 @@
-def examplefunction(arg1, arg2, kwarg='something'):
+def examplefunction(arg1, arg2, kwarg="something"):
     """
     This is an example on how documentation is generated using doxygen and python with doxypypy as a filter.
 
@@ -25,8 +25,8 @@ def examplefunction(arg1, arg2, kwarg='something'):
         >>> examplefunction(4, 1, 'got it.')
         '5 - 4, got it.'
     """
-    assert(isinstance(arg1, int), "Woah!")
-    return f'{arg1+arg2} - {arg1 / arg2}, {kwarg}'
+    assert (isinstance(arg1, int), "Woah!")
+    return f"{arg1+arg2} - {arg1 / arg2}, {kwarg}"
 
 
 class ExampleClass:
@@ -36,6 +36,7 @@ class ExampleClass:
     Args:
         arg1:    [in] some param that goes in
     """
+
     def __init__(self, arg1):
         """
         This is an example of an init declaration.
