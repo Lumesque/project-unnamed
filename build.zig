@@ -118,6 +118,9 @@ pub fn build(b: *std.Build) void {
     add_remove_all_dirs(b, clean_step, b.pathFromRoot("."), ".pytest_cache") catch |err| {
         std.debug.print("{}\n", .{err});
     };
+    add_remove_all_dirs(b, clean_step, b.pathFromRoot("."), ".ruff_cache") catch |err| {
+        std.debug.print("{}\n", .{err});
+    };
 
     // Currently, this will cache the steps and so if it passes, it will always pass, but this should only be used on new systems and once
     const healthcheck = b.step("check", "Checks that the necessary build components are installed.");
