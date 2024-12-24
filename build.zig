@@ -8,8 +8,8 @@ pub fn build(b: *std.Build) void {
     // what target to build for. Here we do not override the defaults, which
     // means any target is allowed, and the default is native. Other options
     // for restricting supported target set are available.
+    const no_stdout = b.option(bool, "no-stdout", "Disable stdout of child processes") orelse false;
     const target = b.standardTargetOptions(.{});
-    b.dest_dir = ".";
 
     // Standard optimization options allow the person running `zig build` to select
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall. Here we do not
@@ -68,11 +68,15 @@ pub fn build(b: *std.Build) void {
     if (b.args) |args| {
         pytests.addArgs(args);
     }
+    if (no_stdout)
+        _ = pytests.captureStdOut();
     pytests.failing_to_execute_foreign_is_an_error = false;
     tests.dependOn(&pytests.step);
 
     const docs = b.step("docs", "Generate docs");
     const doxy_run = b.addSystemCommand(&.{ "doxygen", "doxygen.config" });
+    if (no_stdout)
+        _ = doxy_run.captureStdOut();
     docs.dependOn(&doxy_run.step);
     // Uncomment code below if we ever generate zig files
     //const docs_install = b.addInstallDirectory(.{
@@ -97,6 +101,8 @@ pub fn build(b: *std.Build) void {
     if (b.args) |args| {
         ruff_run.addArgs(args);
     }
+    if (no_stdout)
+        _ = ruff_run.captureStdOut();
     fmt_step.dependOn(&fmt.step);
     fmt_step.dependOn(&ruff_run.step);
 
@@ -112,7 +118,25 @@ pub fn build(b: *std.Build) void {
     add_remove_all_dirs(b, clean_step, b.pathFromRoot("."), ".pytest_cache") catch |err| {
         std.debug.print("{}\n", .{err});
     };
-    //clean_step.dependOn(&b.addRemoveDirTree(b.pathFromRoot("**/__pycache__")).step);
+
+    // Currently, this will cache the steps and so if it passes, it will always pass, but this should only be used on new systems and once
+    const healthcheck = b.step("check", "Checks that the necessary build components are installed.");
+    add_check_cmd_exists(b, healthcheck, &.{ "ruff", "version" });
+    add_check_cmd_exists(b, healthcheck, &.{ "pytest", "-v" });
+    add_check_cmd_exists(b, healthcheck, &.{ "doxygen", "--version" });
+    add_check_cmd_exists(b, healthcheck, &.{ "doxypypy", "--help" });
+
+    const all = b.step("all", "Run install, docs, and tests");
+    all.dependOn(b.getInstallStep());
+    all.dependOn(docs);
+    all.dependOn(tests);
+}
+
+fn add_check_cmd_exists(b: *std.Build, _step: *std.Build.Step, args: []const []const u8) void {
+    const cmd = b.addSystemCommand(args);
+    _ = cmd.captureStdOut();
+    _ = cmd.captureStdErr();
+    _step.dependOn(&cmd.step);
 }
 
 fn add_remove_all_dirs(b: *std.Build, _step: *std.Build.Step, path: []const u8, dirname: []const u8) !void {
