@@ -124,10 +124,10 @@ pub fn build(b: *std.Build) void {
 
     // Currently, this will cache the steps and so if it passes, it will always pass, but this should only be used on new systems and once
     const healthcheck = b.step("check", "Checks that the necessary build components are installed.");
-    add_check_cmd_exists(b, healthcheck, &.{ "ruff", "version" });
-    add_check_cmd_exists(b, healthcheck, &.{ "pytest", "-v" });
-    add_check_cmd_exists(b, healthcheck, &.{ "doxygen", "--version" });
-    add_check_cmd_exists(b, healthcheck, &.{ "doxypypy", "--help" });
+    add_check_cmd_exists(b, healthcheck, &.{ "ruff", "version" }, true);
+    add_check_cmd_exists(b, healthcheck, &.{ "pytest", "-v" }, true);
+    add_check_cmd_exists(b, healthcheck, &.{ "doxygen", "--version" }, true);
+    add_check_cmd_exists(b, healthcheck, &.{ "doxypypy", "--help" }, true);
 
     const all = b.step("all", "Run install, docs, and tests");
     all.dependOn(b.getInstallStep());
@@ -135,10 +135,14 @@ pub fn build(b: *std.Build) void {
     all.dependOn(tests);
 }
 
-fn add_check_cmd_exists(b: *std.Build, _step: *std.Build.Step, args: []const []const u8) void {
+fn add_check_cmd_exists(b: *std.Build, _step: *std.Build.Step, args: []const []const u8, always_run: bool) void {
     const cmd = b.addSystemCommand(args);
     _ = cmd.captureStdOut();
     _ = cmd.captureStdErr();
+    if (always_run) {
+        // This is done so that the command always runs
+        cmd.has_side_effects = true;
+    }
     _step.dependOn(&cmd.step);
 }
 
