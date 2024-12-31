@@ -1,0 +1,35 @@
+on: [push, pull_request]
+name: Example Integration Tests
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.1.6
+      - uses: cachix/install-nix-action@V27
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - run: nix develop -c zig build run --summary all
+  document:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.1.6
+      - uses: cachix/install-nix-action@V27
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - run: nix develop -c zig build docs --summary all
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.1.6
+      - uses: cachix/install-nix-action@V27
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - run: nix develop -c zig build test --summary all
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.1.6
+      - uses: cachix/install-nix-action@V27
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - run: nix develop -c zig build clean --summary all
