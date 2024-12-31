@@ -1,4 +1,5 @@
 const std = @import("std");
+const helpers = @import("custom/build-helpers.zig");
 
 // Although this function looks imperative, note that its job is to
 // declaratively construct a build graph that will be executed by an external
@@ -127,26 +128,15 @@ pub fn build(b: *std.Build) void {
 
     // Currently, this will cache the steps and so if it passes, it will always pass, but this should only be used on new systems and once
     const healthcheck = b.step("check", "Checks that the necessary build components are installed.");
-    add_check_cmd_exists(b, healthcheck, &.{ "ruff", "version" }, true);
-    add_check_cmd_exists(b, healthcheck, &.{ "pytest", "-v" }, true);
-    add_check_cmd_exists(b, healthcheck, &.{ "doxygen", "--version" }, true);
-    add_check_cmd_exists(b, healthcheck, &.{ "doxypypy", "--help" }, true);
+    healthcheck.dependOn(&helpers.addCheck(b, "ruff", .{}).step);
+    healthcheck.dependOn(&helpers.addCheck(b, "pytest", .{}).step);
+    healthcheck.dependOn(&helpers.addCheck(b, "doxygen", .{}).step);
+    healthcheck.dependOn(&helpers.addCheck(b, "doxypypy", .{}).step);
 
     const all = b.step("all", "Run install, docs, and tests");
     all.dependOn(b.getInstallStep());
     all.dependOn(docs);
     all.dependOn(tests);
-}
-
-fn add_check_cmd_exists(b: *std.Build, _step: *std.Build.Step, args: []const []const u8, always_run: bool) void {
-    const cmd = b.addSystemCommand(args);
-    _ = cmd.captureStdOut();
-    _ = cmd.captureStdErr();
-    if (always_run) {
-        // This is done so that the command always runs
-        cmd.has_side_effects = true;
-    }
-    _step.dependOn(&cmd.step);
 }
 
 fn add_remove_all_dirs(b: *std.Build, _step: *std.Build.Step, path: []const u8, dirname: []const u8) !void {
