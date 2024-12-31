@@ -67,3 +67,29 @@ pub fn addCheck(b: *std.Build, comptime prog: []const u8, options: CustomOptions
     tmp.step = s;
     return tmp;
 }
+
+pub fn addRemoveDirTreeRecursive(b: *std.Build, _step: *std.Build.Step, path: []const u8, dirname: []const u8) !void {
+    var dir = try std.fs.cwd().openDir(path, .{ .iterate = true });
+    defer dir.close();
+    var it = dir.iterate();
+    while (try it.next()) |file| {
+        if (std.mem.eql(u8, file.name, dirname)) {
+            if (std.fs.path.join(std.heap.page_allocator, &.{ path, file.name })) |resdir| {
+                _step.dependOn(&b.addRemoveDirTree(b.pathFromRoot(resdir)).step);
+            } else |err| {
+                std.debug.print("Could not join paths {s} and {s}", .{ path, file.name });
+                return err;
+            }
+        } else if (file.kind == .directory) {
+            if (std.fs.path.join(std.heap.page_allocator, &.{ path, file.name })) |newdir| {
+                addRemoveDirTreeRecursive(b, _step, newdir, dirname) catch |err| {
+                    std.debug.print("Could not find {s}\n", .{newdir});
+                    return err;
+                };
+            } else |err| {
+                std.debug.print("Could not join paths {s} and {s}", .{ path, file.name });
+                return err;
+            }
+        }
+    }
+}
