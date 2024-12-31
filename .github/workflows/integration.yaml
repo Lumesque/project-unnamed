@@ -8,7 +8,7 @@ jobs:
       - uses: cachix/install-nix-action@V27
         with:
           nix_path: nixpkgs=channel:nixos-24.05
-      - run: nix develop -c zig build run --summary all
+      - run: nix shell -c zig build run --summary all
   document:
     runs-on: ubuntu-latest
     steps:
