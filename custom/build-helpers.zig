@@ -30,9 +30,6 @@ pub const CustomOptions = struct {
 };
 
 pub fn addCheck(b: *std.Build, comptime prog: []const u8, options: CustomOptions) *Step.Compile {
-    //const options: std.Build.TestOptions = .{
-    //.root_source_file = b.path(""),
-    //};
     const tmp = std.Build.Step.Compile.create(b, .{
         .name = options.name,
         .kind = .@"test",
@@ -54,14 +51,16 @@ pub fn addCheck(b: *std.Build, comptime prog: []const u8, options: CustomOptions
         .use_lld = options.use_lld,
         .zig_lib_dir = options.zig_lib_dir orelse b.zig_lib_dir,
     });
-    const s = std.Build.Step.init(.{ .id = .custom, .name = prog ++ " exists", .owner = b, .makeFn = struct {
+    const s = std.Build.Step.init(.{ .id = .custom, .name = prog ++ " in path", .owner = b, .makeFn = struct {
         pub fn findProg(step: *Step, _: std.Progress.Node) anyerror!void {
             _ = step.owner.findProgram(
                 &[_][]const u8{
                     prog,
                 },
                 &[_][]const u8{},
-            ) catch |err| return err;
+            ) catch |err| {
+                return step.fail("{s}: Unable to find '{s}' in path.\n", .{ @errorName(err), prog });
+            };
         }
     }.findProg });
     tmp.step = s;
