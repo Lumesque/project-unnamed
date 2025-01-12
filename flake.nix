@@ -27,6 +27,7 @@
       pkgs.gcc
       pkgs.doxygen
       pkgs.ruff
+      pkgs.gnumake
       doxypypy
     ];
   in
