@@ -108,7 +108,7 @@ Project chosen:
 - [ ] API for syscalls
 - [ ] TUI/REST api for H5 data tables
 - [ ] TUI application for graphing in terminal
-- [ ] Profiling tool
+- [x] Profiling tool
 - [ ] AST Analyzer
 
 ## Documentation system
